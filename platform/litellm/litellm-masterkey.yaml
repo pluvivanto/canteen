@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: litellm-masterkey
+  namespace: litellm
+spec:
+  encryptedData:
+    masterkey: AgB+ro89zlYtVcX2w75noh9oRNNyLK/q24zeJ060I9gHvUZhAn7EsM68/0esoBxmfFl62EO5b3CTKMChZu9iAPC91sYduSbKSyxZdXyqs9wscmghcvLw4fAJzXQUuUymm1hXWn9i9Nc9QnE8skDWWj8ZwNJIckQfeo25MWvY8AtkHTibPfU3qPV4Rv4W9oG3gGRDsbYR+jTOATJ0FCWqrDGY+lj38td5qMkd9h/u91M78xmMAoUF0s4EOGU+3cjeR6hGTkp2zg7YMBg5L6CMXoeepOWdTqEJTUZp24mXRPe6rzV49yklvy5jRhlPh0Gk4cTwfz7v4UQmh0Hf6LrZyAG0oliTsXJQ6w8H32ScF8t2ypVGrVy+fQ9/ho3zikdE1L1G/V84bs+w2db2Dra900pa+HvE/XyBEyU2c3aQnL76NdlFxsP3lbkwnJ/kmdO5lvX3KqSoqaYMTvLq+FM8jAVoGWUxE+EOBiRzefzAXRHkzcpvqDSp+ep+fG6V013Y3LD7rg1/L3b7pPk11BAa/Ph+1wXgL5B32sP1fZuuEGQXJTL3ZD/5Mjl4CWk9ZNGSxTaAbk7KovLMHGxz8cjqkXJTLXvniV0i/qqsR/5o9VV05MKjcMmqkLmPvs6KXfw06QVluSD6TVtojYd9H3EmqrFOi4Bm6lIaLXj4U5nokDjykuUIlXzpy5u78BpR+CQuEStKtK9Q5URazhYoUnqRTrBH/CFnQLN82sO77DJIcFp9PAyxzSIAkXkjH+mU2G5Wa3oTZbS7Gjug/xrLL9iNCPXrSGMp
+  template:
+    metadata:
+      name: litellm-masterkey
+      namespace: litellm
