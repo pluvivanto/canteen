@@ -35,7 +35,14 @@ spec:
               name: litellm-db-app
               usernameKey: username
               passwordKey: password
+          metricsServer:
+            enabled: true
+          serviceMonitor:
+            enabled: true
           proxy_config:
+            litellm_settings:
+              callbacks:
+                - prometheus
             model_list:
               - model_name: mock
                 litellm_params:
