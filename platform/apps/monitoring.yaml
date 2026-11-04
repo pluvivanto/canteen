@@ -7,7 +7,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/pluvivanto/hackops-ai-platform.git
-      targetRevision: main
+      targetRevision: local
       path: platform/monitoring
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack

@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/pluvivanto/hackops-ai-platform.git
-    targetRevision: main
+    targetRevision: local
     path: platform/apps
   destination:
     server: https://kubernetes.default.svc

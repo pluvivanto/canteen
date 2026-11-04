@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/pluvivanto/hackops-ai-platform.git
-    targetRevision: main
+    targetRevision: local
     path: platform/litellm-db
   destination:
     server: https://kubernetes.default.svc
