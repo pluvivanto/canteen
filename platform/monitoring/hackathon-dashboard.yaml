@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hackathon-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  hackathon.json: |
+    {
+      "uid": "hackathon",
+      "title": "Hackathon AI Gateway",
+      "schemaVersion": 39,
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "30s",
+      "panels": [
+        {
+          "type": "row", "title": "LiteLLM (per team)", "collapsed": false,
+          "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+        },
+        {
+          "type": "timeseries", "title": "Requests / s",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{team}} {{status_code}}",
+            "expr": "sum by (team, status_code) (rate(litellm_proxy_total_requests_metric_total{team!=\"None\"}[$__rate_interval]))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "5xx error rate",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{team}}",
+            "expr": "sum by (team) (rate(litellm_proxy_total_requests_metric_total{team!=\"None\", status_code=~\"5..\"}[$__rate_interval])) / sum by (team) (rate(litellm_proxy_total_requests_metric_total{team!=\"None\"}[$__rate_interval]))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "p95 latency",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 0, "y": 9, "w": 12, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{team}}",
+            "expr": "histogram_quantile(0.95, sum by (team, le) (rate(litellm_request_total_latency_metric_bucket{team!=\"None\"}[$__rate_interval])))"
+          }]
+        },
+        {
+          "type": "bargauge", "title": "Tokens used (selected range)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 12, "y": 9, "w": 12, "h": 8 },
+          "options": { "orientation": "horizontal", "displayMode": "basic" },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{team}}", "instant": true,
+            "expr": "sort_desc(sum by (team) (increase(litellm_total_tokens_metric_total{team!=\"None\"}[$__range])))"
+          }]
+        },
+        {
+          "type": "row", "title": "Cluster", "collapsed": false,
+          "gridPos": { "x": 0, "y": 17, "w": 24, "h": 1 }
+        },
+        {
+          "type": "bargauge", "title": "Pod restarts (selected range, top 10)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 0, "y": 18, "w": 8, "h": 8 },
+          "options": { "orientation": "horizontal", "displayMode": "basic" },
+          "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{namespace}}/{{pod}}", "instant": true,
+            "expr": "topk(10, sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total[$__range])))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "CPU by namespace",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 8, "y": 18, "w": 8, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{namespace}}",
+            "expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{container!=\"\"}[$__rate_interval]))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "Memory by namespace",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 16, "y": 18, "w": 8, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{namespace}}",
+            "expr": "sum by (namespace) (container_memory_working_set_bytes{container!=\"\"})"
+          }]
+        }
+      ]
+    }
