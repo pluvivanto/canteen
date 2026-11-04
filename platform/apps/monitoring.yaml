@@ -28,6 +28,17 @@ spec:
               serviceMonitorSelectorNilUsesHelmValues: false
               podMonitorSelectorNilUsesHelmValues: false
               ruleSelectorNilUsesHelmValues: false
+          alertmanager:
+            route:
+              main:
+                enabled: true
+                hostnames:
+                  - alertmanager.localtest.me
+                parentRefs:
+                  - group: gateway.networking.k8s.io
+                    kind: Gateway
+                    name: traefik-gateway
+                    namespace: traefik
           grafana:
             admin:
               existingSecret: grafana-admin

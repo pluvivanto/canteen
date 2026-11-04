@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: hackathon-alerts
+spec:
+  groups:
+    - name: litellm
+      rules:
+        - alert: LiteLLMHighErrorRate
+          expr: |
+            sum(rate(litellm_proxy_total_requests_metric_total{status_code=~"5.."}[5m]))
+              / sum(rate(litellm_proxy_total_requests_metric_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: LiteLLM 5xx ratio is {{ $value | humanizePercentage }}
+        - alert: LiteLLMDatabaseNotReady
+          expr: |
+            (sum(kube_pod_status_ready{namespace="litellm", pod=~"litellm-db-[0-9]+", condition="true"}) or vector(0)) < 2
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $value }} of 2 LiteLLM DB instances ready"
