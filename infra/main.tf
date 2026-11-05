@@ -21,10 +21,6 @@ provider "aws" {
   }
 }
 
-variable "domain" {
-  type = string
-}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -51,10 +47,6 @@ module "vpc" {
   }
 }
 
-resource "aws_route53_zone" "main" {
-  name = var.domain
-}
-
-output "name_servers" {
-  value = aws_route53_zone.main.name_servers
+data "aws_route53_zone" "main" {
+  name = "hackathon.pluvivanto.win"
 }

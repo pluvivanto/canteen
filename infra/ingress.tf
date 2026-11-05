@@ -1,5 +1,5 @@
 resource "aws_acm_certificate" "wildcard" {
-  domain_name       = "*.${var.domain}"
+  domain_name       = "*.hackathon.pluvivanto.win"
   validation_method = "DNS"
 
   lifecycle {
@@ -12,7 +12,7 @@ resource "aws_route53_record" "wildcard_validation" {
     for o in aws_acm_certificate.wildcard.domain_validation_options : o.domain_name => o
   }
 
-  zone_id = aws_route53_zone.main.zone_id
+  zone_id = data.aws_route53_zone.main.zone_id
   name    = each.value.resource_record_name
   type    = each.value.resource_record_type
   records = [each.value.resource_record_value]
@@ -81,7 +81,7 @@ module "external_dns_pod_identity" {
 
   name                          = "external-dns"
   attach_external_dns_policy    = true
-  external_dns_hosted_zone_arns = [aws_route53_zone.main.arn]
+  external_dns_hosted_zone_arns = [data.aws_route53_zone.main.arn]
 
   associations = {
     this = {
