@@ -15,11 +15,3 @@ spec:
             severity: critical
           annotations:
             summary: LiteLLM 5xx ratio is {{ $value | humanizePercentage }}
-        - alert: LiteLLMDatabaseNotReady
-          expr: |
-            (sum(kube_pod_status_ready{namespace="litellm", pod=~"litellm-db-[0-9]+", condition="true"}) or vector(0)) < 2
-          for: 1m
-          labels:
-            severity: warning
-          annotations:
-            summary: "{{ $value }} of 2 LiteLLM DB instances ready"
