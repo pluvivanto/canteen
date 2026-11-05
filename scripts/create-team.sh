@@ -11,9 +11,9 @@ if [[ ! $TEAM_ID =~ ^team-[a-z0-9-]+$ || $TEAM_ID == *- || ${#TEAM_ID} -gt 63 ]]
 	exit 1
 fi
 
-MASTER_KEY=$(kubectl --context kind-hackathon -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
+MASTER_KEY=$(kubectl --context eks-hackathon -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
 
-RESPONSE=$(curl -sS --fail-with-body http://llm.localtest.me/team/new \
+RESPONSE=$(curl -sS --fail-with-body https://llm.hackathon.pluvivanto.win/team/new \
 	-H "Authorization: Bearer $MASTER_KEY" \
 	-H "Content-Type: application/json" \
 	-d "{\"team_id\": \"$TEAM_ID\", \"team_alias\": \"$DISPLAY_NAME\", \"max_budget\": $MAX_BUDGET, \"rpm_limit\": $RPM_LIMIT}") ||
@@ -22,7 +22,7 @@ RESPONSE=$(curl -sS --fail-with-body http://llm.localtest.me/team/new \
 		exit 1
 	}
 
-curl -sS --fail-with-body http://llm.localtest.me/key/generate \
+curl -sS --fail-with-body https://llm.hackathon.pluvivanto.win/key/generate \
 	-H "Authorization: Bearer $MASTER_KEY" \
 	-H "Content-Type: application/json" \
 	-d "{\"team_id\": \"$TEAM_ID\"}" |

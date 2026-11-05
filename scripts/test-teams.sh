@@ -4,10 +4,10 @@ set -e
 cd "$(dirname "$0")"
 
 RUN_ID=$(date +%s)
-MASTER_KEY=$(kubectl --context kind-hackathon -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
+MASTER_KEY=$(kubectl --context eks-hackathon -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
 
 call() {
-	curl -s -o /dev/null -w '%{http_code}' http://llm.localtest.me/v1/chat/completions \
+	curl -s -o /dev/null -w '%{http_code}' https://llm.hackathon.pluvivanto.win/v1/chat/completions \
 		-H "Authorization: Bearer $1" \
 		-H "Content-Type: application/json" \
 		-d '{"model": "mock", "messages": [{"role": "user", "content": "hi"}]}'
@@ -43,13 +43,13 @@ fi
 echo -n "budget: "
 TEAM_ID=team-test-budget-$RUN_ID
 KEY=$(./create-team.sh "$TEAM_ID" "Budget Test")
-curl -s -o /dev/null http://llm.localtest.me/team/update \
+curl -s -o /dev/null https://llm.hackathon.pluvivanto.win/team/update \
 	-H "Authorization: Bearer $MASTER_KEY" \
 	-H "Content-Type: application/json" \
 	-d "{\"team_id\": \"$TEAM_ID\", \"max_budget\": 0.00001}"
 FIRST=$(call "$KEY")
 sleep 2
-SECOND=$(curl -s http://llm.localtest.me/v1/chat/completions \
+SECOND=$(curl -s https://llm.hackathon.pluvivanto.win/v1/chat/completions \
 	-H "Authorization: Bearer $KEY" \
 	-H "Content-Type: application/json" \
 	-d '{"model": "mock", "messages": [{"role": "user", "content": "hi"}]}')
