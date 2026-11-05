@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: litellm
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/pluvivanto/hackops-ai-platform.git
+      targetRevision: main
+      path: platform/litellm
+    - repoURL: docker.litellm.ai/berriai
+      chart: litellm-helm
+      targetRevision: 1.106.6
+      helm:
+        valuesObject:
+          image:
+            pullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          masterkeySecretName: litellm-masterkey
+          masterkeySecretKey: masterkey
+          db:
+            deployStandalone: false
+            useExisting: true
+            endpoint: litellm-db.hackathon.internal
+            database: litellm
+            secret:
+              name: litellm-db-app
+              usernameKey: username
+              passwordKey: password
+          metricsServer:
+            enabled: true
+          serviceMonitor:
+            enabled: true
+          proxy_config:
+            litellm_settings:
+              callbacks:
+                - prometheus
+            model_list:
+              - model_name: mock
+                litellm_params:
+                  model: openai/mock
+                  api_key: unused
+                  mock_response: "mock response"
+                  input_cost_per_token: 0.000001
+                  output_cost_per_token: 0.000002
+            general_settings:
+              master_key: os.environ/PROXY_MASTER_KEY
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: litellm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+    syncOptions:
+      - CreateNamespace=true
