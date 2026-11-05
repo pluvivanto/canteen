@@ -1,0 +1,12 @@
+apiVersion: gateway.k8s.aws/v1
+kind: TargetGroupConfiguration
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  targetReference:
+    name: monitoring-grafana
+  defaultConfiguration:
+    targetType: ip
+    healthCheckConfig:
+      healthCheckPath: /api/health
