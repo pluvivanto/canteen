@@ -1,5 +1,5 @@
-variable "admin_cidr" {
-  type = string
+variable "admin_cidrs" {
+  type = list(string)
 }
 
 module "eks" {
@@ -13,7 +13,7 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   endpoint_public_access       = true
-  endpoint_public_access_cidrs = [var.admin_cidr]
+  endpoint_public_access_cidrs = var.admin_cidrs
 
   enable_cluster_creator_admin_permissions = true
 
