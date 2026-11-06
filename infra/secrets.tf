@@ -50,3 +50,20 @@ module "external_secrets_pod_identity" {
     }
   }
 }
+
+resource "random_password" "team_manager_admin" {
+  length  = 48
+  special = false
+}
+
+resource "aws_secretsmanager_secret" "team_manager_admin" {
+  name                    = "hackathon/team-manager-admin"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "team_manager_admin" {
+  secret_id = aws_secretsmanager_secret.team_manager_admin.id
+  secret_string = jsonencode({
+    token = random_password.team_manager_admin.result
+  })
+}

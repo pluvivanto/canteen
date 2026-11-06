@@ -38,6 +38,18 @@ spec:
                 secretKeyRef:
                   name: team-manager-db
                   key: password
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: team-manager-admin
+                  key: token
+            - name: LITELLM_URL
+              value: http://litellm.litellm.svc:4000
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-masterkey
+                  key: masterkey
           readinessProbe:
             httpGet:
               path: /healthz
