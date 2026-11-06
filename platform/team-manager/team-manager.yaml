@@ -19,7 +19,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: team-manager
-          image: public.ecr.aws/t8f0j3e9/team-manager:80dc6bb6b4ffc729a0e25d8cc0164f3f90f069b7
+          image: public.ecr.aws/t8f0j3e9/team-manager:36f4bb6610b97690edaf64b1130cc2be3f856ef7
           ports:
             - name: http
               containerPort: 8080
