@@ -65,14 +65,22 @@ Endpoints:
 ## Usage
 
 ```console
-$ ./scripts/create-team.sh team-foo "Team Foo"
-sk-...
+$ curl https://team.<domain>/teams \
+    -H "Authorization: Bearer <admin token>" \
+    -d '{"display_name": "Team Foo"}'
+{"id":"team-<id key>","display_name":"Team Foo",...}
+$ curl -X POST https://team.<domain>/teams/team-<id key>/keys \
+    -H "Authorization: Bearer <admin token>"
+{"key":"sk-..."}
 $ curl https://llm.<domain>/v1/chat/completions \
     -H "Authorization: Bearer sk-..." \
     -H "Content-Type: application/json" \
     -d '{"model": "<model>", "messages": [...]}'
-$ ./scripts/delete-team.sh team-foo
+$ curl -X DELETE https://team.<domain>/teams/team-<id key> \
+    -H "Authorization: Bearer <admin token>"
 ```
+
+Calling `POST /teams/{id}/keys` again revokes the old key.
 
 Models are configured in `platform/apps/litellm.yaml`.
 

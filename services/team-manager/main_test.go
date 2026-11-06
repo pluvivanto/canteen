@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -56,13 +57,13 @@ func TestValidateDisplayName(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"Cool Team", "Cool Team", false},
-		{"  Cool Team  ", "Cool Team", false},
-		{"멋진 팀", "멋진 팀", false},
+		{"Foo Bar", "Foo Bar", false},
+		{"  Foo Bar  ", "Foo Bar", false},
 		{"", "", true},
 		{"   ", "", true},
-		{"가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나", "가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나", false},
-		{"가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다", "", true},
+		{strings.Repeat("a", 30), strings.Repeat("a", 30), false},
+		{strings.Repeat("a", 31), "", true},
+		{strings.Repeat("가", 30), strings.Repeat("가", 30), false},
 	}
 	for _, tt := range tests {
 		got, err := validateDisplayName(tt.in)
