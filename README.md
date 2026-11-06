@@ -1,65 +1,73 @@
 # hackops-ai-platform
 
 hackops-ai-platform is an LLM gateway for hackathons, with per-team API keys, budgets, rate limits, and usage dashboards.
-It runs LiteLLM, PostgreSQL, Prometheus, and Grafana on Kubernetes, managed with GitOps through Argo CD.
+It runs LiteLLM, Prometheus, and Grafana on Amazon EKS, managed with GitOps through Argo CD.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    user --> traefik
+    user --> alb[ALB]
     git[(GitHub)] -->|pull| argocd
 
-    subgraph cluster [kind cluster]
-        argocd[Argo CD] -->|sync| apps
-        subgraph apps [platform/apps]
-            traefik[Traefik<br>Gateway API] --> litellm[LiteLLM]
-            traefik --> grafana[Grafana]
-            litellm --> pg[(PostgreSQL x2<br>CloudNativePG)]
-            prom[Prometheus] --> litellm
-            grafana --> prom
+    subgraph aws [AWS]
+        alb --> gw
+        subgraph cluster [EKS cluster]
+            argocd[Argo CD] -->|sync| apps
+            subgraph apps [platform/apps]
+                gw[Gateway API<br>LB Controller] --> litellm[LiteLLM]
+                gw --> grafana[Grafana]
+                prom[Prometheus] --> litellm
+                grafana --> prom
+                eso[External Secrets]
+                dns[external-dns]
+            end
         end
+        litellm --> rds[(RDS PostgreSQL)]
+        eso --> sm[Secrets Manager]
+        dns --> r53[Route 53]
     end
 ```
 
 ## Requirements
 
-- [Docker](https://docs.docker.com/engine/install/)
-- [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Terraform](https://developer.hashicorp.com/terraform/install)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Helm](https://helm.sh/docs/intro/install/)
-- [kubeseal](https://github.com/bitnami/sealed-secrets#kubeseal)
 - [jq](https://jqlang.org/download/)
 
 ## Deploy
 
-1. Fork the repo and replace `pluvivanto/hackops-ai-platform` under `platform/` with your fork.
-2. Create the cluster and bootstrap Argo CD:
+1. Fork the repo. Under `platform/`, replace `pluvivanto/hackops-ai-platform` with your fork. Replace the domain in `platform/`, `scripts/`, and `infra/` with yours.
+2. Create the DNS zone with `terraform apply` in `infra/dns/`, then delegate your domain to the printed name servers.
+3. Set `admin_cidrs` and `alert_email` in `infra/terraform.tfvars`.
+4. Create the cluster and bootstrap Argo CD:
 
    ```sh
-   kind create cluster --config cluster/kind.yaml
+   cd infra && terraform apply && cd ..
+   aws eks update-kubeconfig --name hackathon --region ap-northeast-1
    helm install argocd argo-cd --repo https://argoproj.github.io/argo-helm --version 10.11.6 -n argocd --create-namespace
+   kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.3/standard-install.yaml
    kubectl apply -f platform/root.yaml
    ```
 
-3. Re-seal the secrets for your cluster with `kubeseal` and push:
-   - `platform/litellm/litellm-masterkey.yaml`: `masterkey`
-   - `platform/monitoring/grafana-admin.yaml`: `admin-user`, `admin-password`
-4. Run `./scripts/test-teams.sh` once all apps are healthy.
+5. Confirm the SNS subscription email.
+6. Run `./scripts/test-teams.sh` once all apps are healthy.
 
 Endpoints:
 
-- <http://argocd.localtest.me>
-- <http://grafana.localtest.me>
-- <http://alertmanager.localtest.me>
-- <http://llm.localtest.me>
+- `https://argocd.<domain>`
+- `https://grafana.<domain>`
+- `https://alertmanager.<domain>`
+- `https://llm.<domain>`
 
 ## Usage
 
 ```console
 $ ./scripts/create-team.sh team-foo "Team Foo"
 sk-...
-$ curl http://llm.localtest.me/v1/chat/completions \
+$ curl https://llm.<domain>/v1/chat/completions \
     -H "Authorization: Bearer sk-..." \
     -H "Content-Type: application/json" \
     -d '{"model": "<model>", "messages": [...]}'
