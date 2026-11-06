@@ -1,0 +1,42 @@
+name: team-manager
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - services/team-manager/**
+      - .github/workflows/team-manager.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  IMAGE: public.ecr.aws/t8f0j3e9/team-manager
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/team-manager
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: services/team-manager/go.mod
+
+      - run: go test ./...
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - run: aws ecr-public get-login-password | docker login --username AWS --password-stdin public.ecr.aws
+
+      - run: |
+          docker build -t "$IMAGE:$GITHUB_SHA" .
+          docker push "$IMAGE:$GITHUB_SHA"
