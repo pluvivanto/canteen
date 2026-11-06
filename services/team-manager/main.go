@@ -36,6 +36,7 @@ func newHandler(s *server, adminToken string) http.Handler {
 	api.HandleFunc("GET /teams", s.listTeams)
 	api.HandleFunc("GET /teams/{id}", s.getTeam)
 	api.HandleFunc("DELETE /teams/{id}", s.deleteTeam)
+	api.HandleFunc("POST /teams/{id}/keys", s.issueKey)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
