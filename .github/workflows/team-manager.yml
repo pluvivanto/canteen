@@ -6,6 +6,7 @@ on:
     paths:
       - services/team-manager/**
       - .github/workflows/team-manager.yml
+  workflow_dispatch:
 
 permissions:
   id-token: write
