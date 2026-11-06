@@ -14,5 +14,6 @@ func newHandler() http.Handler {
 }
 
 func main() {
+	log.Println("listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", newHandler()))
 }
