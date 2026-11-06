@@ -74,3 +74,50 @@ resource "aws_route53_record" "litellm_db" {
   ttl     = 60
   records = [aws_db_instance.litellm.address]
 }
+
+resource "random_password" "team_manager_db" {
+  length  = 32
+  special = false
+}
+
+resource "aws_db_instance" "team_manager" {
+  identifier     = "hackathon-team-manager"
+  engine         = "postgres"
+  engine_version = "18.3"
+  instance_class = "db.t4g.micro"
+
+  allocated_storage = 20
+  storage_type      = "gp3"
+  storage_encrypted = true
+
+  db_name  = "team_manager"
+  username = "team_manager"
+  password = random_password.team_manager_db.result
+
+  multi_az               = true
+  db_subnet_group_name   = aws_db_subnet_group.main.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
+
+  skip_final_snapshot = true
+}
+
+resource "aws_secretsmanager_secret" "team_manager_db" {
+  name                    = "hackathon/team-manager-db"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "team_manager_db" {
+  secret_id = aws_secretsmanager_secret.team_manager_db.id
+  secret_string = jsonencode({
+    username = aws_db_instance.team_manager.username
+    password = random_password.team_manager_db.result
+  })
+}
+
+resource "aws_route53_record" "team_manager_db" {
+  zone_id = aws_route53_zone.internal.zone_id
+  name    = "team-manager-db.hackathon.internal"
+  type    = "CNAME"
+  ttl     = 60
+  records = [aws_db_instance.team_manager.address]
+}

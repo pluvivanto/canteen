@@ -23,6 +23,21 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: team-manager-db.hackathon.internal
+            - name: DB_NAME
+              value: team_manager
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: team-manager-db
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: team-manager-db
+                  key: password
           readinessProbe:
             httpGet:
               path: /healthz

@@ -1,0 +1,12 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: team-manager-db
+  namespace: team-manager
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager
+  dataFrom:
+    - extract:
+        key: hackathon/team-manager-db
