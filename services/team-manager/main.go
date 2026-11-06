@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -43,7 +45,7 @@ func newHandler(s *server, adminToken string) http.Handler {
 		w.Write([]byte("ok"))
 	})
 	mux.Handle("/", requireToken(adminToken, api))
-	return mux
+	return instrument(mux)
 }
 
 func main() {
@@ -59,6 +61,9 @@ func main() {
 	defer db.Close()
 
 	s := &server{db: db, litellm: newLiteLLM(os.Getenv("LITELLM_URL"), os.Getenv("LITELLM_MASTER_KEY"))}
+	go func() {
+		log.Fatal(http.ListenAndServe(":9090", promhttp.Handler()))
+	}()
 	log.Println("listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", newHandler(s, adminToken)))
 }

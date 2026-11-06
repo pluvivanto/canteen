@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func TestHealthz(t *testing.T) {
@@ -70,5 +72,15 @@ func TestValidateDisplayName(t *testing.T) {
 		if (err != nil) != tt.wantErr || got != tt.want {
 			t.Errorf("validateDisplayName(%q) = %q, %v; want %q, wantErr %v", tt.in, got, err, tt.want, tt.wantErr)
 		}
+	}
+}
+
+func TestInstrumentUsesRoutePattern(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /teams/{id}", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusTeapot) })
+	instrument(mux).ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("GET", "/teams/team-abc", nil))
+
+	if got := testutil.ToFloat64(httpRequests.WithLabelValues("GET /teams/{id}", "418")); got != 1 {
+		t.Fatalf("requests{route=GET /teams/{id}, code=418} = %v, want 1", got)
 	}
 }

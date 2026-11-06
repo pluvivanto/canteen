@@ -23,6 +23,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: metrics
+              containerPort: 9090
           env:
             - name: DB_HOST
               value: team-manager-db.hackathon.internal
@@ -79,6 +81,8 @@ kind: Service
 metadata:
   name: team-manager
   namespace: team-manager
+  labels:
+    app: team-manager
 spec:
   selector:
     app: team-manager
@@ -86,3 +90,6 @@ spec:
     - name: http
       port: 80
       targetPort: http
+    - name: metrics
+      port: 9090
+      targetPort: metrics

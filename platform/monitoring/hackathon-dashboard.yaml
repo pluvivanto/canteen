@@ -59,13 +59,47 @@ data:
           }]
         },
         {
-          "type": "row", "title": "Cluster", "collapsed": false,
+          "type": "row", "title": "team-manager", "collapsed": false,
           "gridPos": { "x": 0, "y": 17, "w": 24, "h": 1 }
+        },
+        {
+          "type": "timeseries", "title": "Requests / s",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 0, "y": 18, "w": 8, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{route}} {{code}}",
+            "expr": "sum by (route, code) (rate(team_manager_http_requests_total[$__rate_interval]))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "p95 latency",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 8, "y": 18, "w": 8, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{route}}",
+            "expr": "histogram_quantile(0.95, sum by (route, le) (rate(team_manager_http_request_duration_seconds_bucket[$__rate_interval])))"
+          }]
+        },
+        {
+          "type": "timeseries", "title": "LiteLLM call errors / s",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 16, "y": 18, "w": 8, "h": 8 },
+          "fieldConfig": { "defaults": { "unit": "reqps", "min": 0 }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{path}}",
+            "expr": "sum by (path) (rate(team_manager_litellm_errors_total[$__rate_interval]))"
+          }]
+        },
+        {
+          "type": "row", "title": "Cluster", "collapsed": false,
+          "gridPos": { "x": 0, "y": 26, "w": 24, "h": 1 }
         },
         {
           "type": "bargauge", "title": "Pod restarts (selected range, top 10)",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "x": 0, "y": 18, "w": 8, "h": 8 },
+          "gridPos": { "x": 0, "y": 27, "w": 8, "h": 8 },
           "options": { "orientation": "horizontal", "displayMode": "basic" },
           "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
           "targets": [{
@@ -76,7 +110,7 @@ data:
         {
           "type": "timeseries", "title": "CPU by namespace",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "x": 8, "y": 18, "w": 8, "h": 8 },
+          "gridPos": { "x": 8, "y": 27, "w": 8, "h": 8 },
           "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
           "targets": [{
             "refId": "A", "legendFormat": "{{namespace}}",
@@ -86,7 +120,7 @@ data:
         {
           "type": "timeseries", "title": "Memory by namespace",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "x": 16, "y": 18, "w": 8, "h": 8 },
+          "gridPos": { "x": 16, "y": 27, "w": 8, "h": 8 },
           "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
           "targets": [{
             "refId": "A", "legendFormat": "{{namespace}}",

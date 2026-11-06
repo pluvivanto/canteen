@@ -15,3 +15,20 @@ spec:
             severity: critical
           annotations:
             summary: LiteLLM 5xx ratio is {{ $value | humanizePercentage }}
+    - name: team-manager
+      rules:
+        - alert: TeamManagerHighErrorRate
+          expr: |
+            sum(rate(team_manager_http_requests_total{code=~"5.."}[5m]))
+              / sum(rate(team_manager_http_requests_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: team-manager 5xx ratio is {{ $value | humanizePercentage }}
+        - alert: TeamManagerLiteLLMErrors
+          expr: sum(increase(team_manager_litellm_errors_total[5m])) > 0
+          labels:
+            severity: warning
+          annotations:
+            summary: team-manager failed {{ $value | humanize }} LiteLLM calls in 5m

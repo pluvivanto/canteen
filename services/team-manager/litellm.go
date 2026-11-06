@@ -20,6 +20,14 @@ func newLiteLLM(url, masterKey string) *litellm {
 }
 
 func (l *litellm) post(path string, body, out any) error {
+	err := l.do(path, body, out)
+	if err != nil {
+		litellmErrors.WithLabelValues(path).Inc()
+	}
+	return err
+}
+
+func (l *litellm) do(path string, body, out any) error {
 	data, err := json.Marshal(body)
 	if err != nil {
 		return err
