@@ -26,6 +26,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: services/team-manager/go.mod
+          cache-dependency-path: services/team-manager/go.sum
 
       - run: go test ./...
 
