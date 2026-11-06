@@ -9,7 +9,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
   IMAGE: public.ecr.aws/t8f0j3e9/team-manager
@@ -40,3 +40,14 @@ jobs:
       - run: |
           docker build -t "$IMAGE:$GITHUB_SHA" .
           docker push "$IMAGE:$GITHUB_SHA"
+
+      - name: deploy
+        working-directory: .
+        run: |
+          sed -i "s|image: $IMAGE:.*|image: $IMAGE:$GITHUB_SHA|" platform/team-manager/team-manager.yaml
+          git diff --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "deploy team-manager ${GITHUB_SHA::7}"
+          git pull --rebase
+          git push

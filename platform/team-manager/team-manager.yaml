@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: team-manager
+  namespace: team-manager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: team-manager
+  template:
+    metadata:
+      labels:
+        app: team-manager
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: team-manager
+          image: public.ecr.aws/t8f0j3e9/team-manager:d99e85b78ef6efbfcbea6147feea5527778d35dc
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: team-manager
+  namespace: team-manager
+spec:
+  selector:
+    app: team-manager
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
