@@ -40,7 +40,7 @@ data:
         {
           "type": "timeseries", "title": "p95 latency",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "x": 0, "y": 9, "w": 12, "h": 8 },
+          "gridPos": { "x": 0, "y": 9, "w": 8, "h": 8 },
           "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
           "targets": [{
             "refId": "A", "legendFormat": "{{team}}",
@@ -50,12 +50,23 @@ data:
         {
           "type": "bargauge", "title": "Tokens used (selected range)",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "gridPos": { "x": 12, "y": 9, "w": 12, "h": 8 },
+          "gridPos": { "x": 8, "y": 9, "w": 8, "h": 8 },
           "options": { "orientation": "horizontal", "displayMode": "basic" },
           "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
           "targets": [{
             "refId": "A", "legendFormat": "{{team}}", "instant": true,
             "expr": "sort_desc(sum by (team) (increase(litellm_total_tokens_metric_total{team!=\"None\"}[$__range])))"
+          }]
+        },
+        {
+          "type": "bargauge", "title": "Spend USD (selected range)",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "x": 16, "y": 9, "w": 8, "h": 8 },
+          "options": { "orientation": "horizontal", "displayMode": "basic" },
+          "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 4 }, "overrides": [] },
+          "targets": [{
+            "refId": "A", "legendFormat": "{{team}}", "instant": true,
+            "expr": "sort_desc(sum by (team) (increase(litellm_spend_metric_total{team!=\"None\"}[$__range])))"
           }]
         },
         {

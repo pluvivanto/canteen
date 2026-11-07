@@ -18,6 +18,15 @@ spec:
         valuesObject:
           image:
             pullPolicy: IfNotPresent
+          serviceAccount:
+            create: true
+            name: litellm
+          migrationJob:
+            hooks:
+              argocd:
+                enabled: false
+              helm:
+                enabled: true
           resources:
             requests:
               cpu: 200m
@@ -51,6 +60,10 @@ spec:
                   mock_response: "mock response"
                   input_cost_per_token: 0.000001
                   output_cost_per_token: 0.000002
+              - model_name: claude-haiku-5-5
+                litellm_params:
+                  model: bedrock/jp.anthropic.claude-haiku-5-5
+                  aws_region_name: ap-northeast-1
             general_settings:
               master_key: os.environ/PROXY_MASTER_KEY
   destination:
