@@ -39,12 +39,17 @@ func newHandler(s *server, adminToken string) http.Handler {
 	api.HandleFunc("GET /teams/{id}", s.getTeam)
 	api.HandleFunc("DELETE /teams/{id}", s.deleteTeam)
 	api.HandleFunc("POST /teams/{id}/keys", s.issueKey)
+	api.HandleFunc("POST /teams/{id}/code", s.reissueCode)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})
-	mux.Handle("/", requireToken(adminToken, api))
+	mux.Handle("/teams", requireToken(adminToken, api))
+	mux.Handle("/teams/", requireToken(adminToken, api))
+	mux.Handle("GET /me", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.getMe)))
+	mux.Handle("PATCH /me", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.updateMe)))
+	mux.Handle("POST /me/keys", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.issueMyKey)))
 	return instrument(mux)
 }
 

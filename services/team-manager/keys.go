@@ -8,7 +8,10 @@ import (
 )
 
 func (s *server) issueKey(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	s.issueKeyFor(w, r, r.PathValue("id"))
+}
+
+func (s *server) issueKeyFor(w http.ResponseWriter, r *http.Request, id string) {
 	var issuedAt sql.NullTime
 	err := s.db.QueryRowContext(r.Context(), "SELECT key_issued_at FROM teams WHERE id = $1", id).Scan(&issuedAt)
 	if errors.Is(err, sql.ErrNoRows) {

@@ -92,3 +92,24 @@ if [ "$CODE" = 401 ]; then
 else
 	echo "fail ($CODE)"
 fi
+
+echo -n "team code: "
+CREATED=$(curl -s $TEAM_API/teams -H "Authorization: Bearer $TOKEN" -d '{"display_name": "Code Test"}')
+TEAM_ID=$(echo "$CREATED" | jq -r .id)
+OLD_CODE=$(echo "$CREATED" | jq -r .code)
+TYPED=$(echo "$OLD_CODE" | tr -d - | tr a-z A-Z)
+ME=$(curl -s $TEAM_API/me -H "Authorization: Bearer $TYPED" | jq -r .display_name)
+RENAMED=$(curl -s -X PATCH $TEAM_API/me -H "Authorization: Bearer $OLD_CODE" -d '{"display_name": "Foo Bar"}' | jq -r .display_name)
+KEY=$(curl -s -X POST $TEAM_API/me/keys -H "Authorization: Bearer $OLD_CODE" | jq -r .key)
+LLM=$(call "$KEY")
+WRONG=$(curl -s -o /dev/null -w '%{http_code}' $TEAM_API/me -H "Authorization: Bearer wrong-code")
+ADMIN=$(curl -s -o /dev/null -w '%{http_code}' $TEAM_API/teams/$TEAM_ID -H "Authorization: Bearer $OLD_CODE")
+NEW_CODE=$(curl -s -X POST $TEAM_API/teams/$TEAM_ID/code -H "Authorization: Bearer $TOKEN" | jq -r .code)
+OLD=$(curl -s -o /dev/null -w '%{http_code}' $TEAM_API/me -H "Authorization: Bearer $OLD_CODE")
+NEW=$(curl -s -o /dev/null -w '%{http_code}' $TEAM_API/me -H "Authorization: Bearer $NEW_CODE")
+if [ "$ME" = "Code Test" ] && [ "$RENAMED" = "Foo Bar" ] && [ "$LLM" = 200 ] && [ "$WRONG" = 401 ] && [ "$ADMIN" = 401 ] && [ "$OLD" = 401 ] && [ "$NEW" = 200 ]; then
+	echo "success"
+else
+	echo "fail (me: $ME, renamed: $RENAMED, llm: $LLM, wrong: $WRONG, admin: $ADMIN, old: $OLD, new: $NEW)"
+fi
+curl -s -o /dev/null -X DELETE $TEAM_API/teams/$TEAM_ID -H "Authorization: Bearer $TOKEN"

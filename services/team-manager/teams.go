@@ -67,10 +67,11 @@ func (s *server) createTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var t team
+	code := newTeamCode()
 	for range 3 {
 		err = s.db.QueryRowContext(r.Context(),
-			"INSERT INTO teams (id, display_name) VALUES ($1, $2) RETURNING id, display_name, created_at",
-			newTeamID(), name).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
+			"INSERT INTO teams (id, display_name, code_hash) VALUES ($1, $2, $3) RETURNING id, display_name, created_at",
+			newTeamID(), name, hashCode(code)).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
 		if !isUniqueViolation(err) {
 			break
 		}
@@ -89,7 +90,10 @@ func (s *server) createTeam(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadGateway, "could not create team in litellm")
 		return
 	}
-	writeJSON(w, http.StatusCreated, t)
+	writeJSON(w, http.StatusCreated, struct {
+		team
+		Code string `json:"code"`
+	}{t, code})
 }
 
 func (s *server) listTeams(w http.ResponseWriter, r *http.Request) {
@@ -119,9 +123,13 @@ func (s *server) listTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) getTeam(w http.ResponseWriter, r *http.Request) {
+	s.writeTeam(w, r, r.PathValue("id"))
+}
+
+func (s *server) writeTeam(w http.ResponseWriter, r *http.Request, id string) {
 	var t team
 	err := s.db.QueryRowContext(r.Context(), "SELECT id, display_name, created_at FROM teams WHERE id = $1",
-		r.PathValue("id")).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
+		id).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		writeError(w, http.StatusNotFound, "team not found")
 		return
