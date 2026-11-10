@@ -1,3 +1,7 @@
+variable "github_sub_prefix" {
+  type = string
+}
+
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"
@@ -29,7 +33,7 @@ resource "aws_iam_role" "github_ci" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:pluvivanto@140719273/hackops-ai-platform@1441790884:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub" = "${var.github_sub_prefix}:ref:refs/heads/main"
         }
       }
     }]

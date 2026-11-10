@@ -1,8 +1,8 @@
-# hackops-ai-platform
+# canteen
 
-hackops-ai-platform is a self-hosted LLM gateway that gives every hackathon team its own Claude API and takes key management off your hands. Deploy it to your AWS account, create the teams, and the event is ready.
+canteen is a self-hosted LLM gateway that gives every hackathon team its own Claude API and takes key management off your hands. Deploy it to your AWS account, create the teams, and the event is ready.
 
-With hackops-ai-platform, you can:
+With canteen, you can:
 
 - Give each team its own API key, budget, and rate limit
 - Let teams get and replace their key on a self-service page
@@ -60,28 +60,21 @@ Requirements: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting
 
 1. Fork the repository.
 
-2. Create the DNS zone:
+2. Fill in the settings:
+
+   ```sh
+   cp infra/terraform.tfvars.example infra/terraform.tfvars
+   cp infra/dns/terraform.tfvars.example infra/dns/terraform.tfvars
+   ```
+
+3. Create the DNS zone:
 
    ```sh
    terraform -chdir=infra/dns init
    terraform -chdir=infra/dns apply   # set the printed name servers at your registrar
    ```
 
-3. Create `infra/terraform.tfvars`:
-
-   ```hcl
-   admin_cidrs = ["<operator IP>/32"]
-   venue_cidrs = []
-   alert_email = "<email for alarms>"
-   ```
-
-4. Set the OIDC subject in `infra/ci.tf`:
-
-   ```sh
-   gh api repos/<owner>/<repo>/actions/oidc/customization/sub
-   ```
-
-5. Create the cluster and install Argo CD:
+4. Create the cluster and install Argo CD:
 
    ```sh
    terraform -chdir=infra init
@@ -92,21 +85,21 @@ Requirements: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting
    kubectl apply -f platform/root.yaml
    ```
 
-6. Point CI at your account and build the team-manager image:
+5. Point CI at your account and build the team-manager image:
 
    ```sh
    gh secret set AWS_ROLE_ARN --body "$(terraform -chdir=infra output -raw github_ci_role_arn)"
    gh workflow run team-manager.yml
    ```
 
-7. Test:
+6. Test:
 
    ```sh
    # confirm the SNS email, wait until all apps are healthy
    ./scripts/test-teams.sh
    ```
 
-Rebuild: steps 5 and 6.
+Rebuild: steps 4 and 5.
 
 Tear down:
 

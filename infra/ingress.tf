@@ -1,5 +1,5 @@
 resource "aws_acm_certificate" "wildcard" {
-  domain_name       = "*.hackathon.pluvivanto.win"
+  domain_name       = "*.${var.domain}"
   validation_method = "DNS"
 
   lifecycle {

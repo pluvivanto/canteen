@@ -17,8 +17,12 @@ provider "aws" {
   }
 }
 
+variable "domain" {
+  type = string
+}
+
 resource "aws_route53_zone" "main" {
-  name = "hackathon.pluvivanto.win"
+  name = var.domain
 
   lifecycle {
     prevent_destroy = true

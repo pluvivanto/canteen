@@ -47,6 +47,10 @@ module "vpc" {
   }
 }
 
+variable "domain" {
+  type = string
+}
+
 data "aws_route53_zone" "main" {
-  name = "hackathon.pluvivanto.win"
+  name = var.domain
 }

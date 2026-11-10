@@ -1,4 +1,4 @@
-module github.com/pluvivanto/hackops-ai-platform/services/team-manager
+module github.com/pluvivanto/canteen/services/team-manager
 
 go 1.26.0
 
