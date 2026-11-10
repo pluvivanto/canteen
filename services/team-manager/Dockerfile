@@ -4,6 +4,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY *.go ./
 COPY migrations ./migrations
+COPY static ./static
 RUN CGO_ENABLED=0 go build -o /team-manager .
 
 FROM gcr.io/distroless/static-debian13:nonroot

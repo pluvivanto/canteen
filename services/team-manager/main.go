@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/subtle"
+	"embed"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -32,6 +33,17 @@ func requireToken(token string, next http.Handler) http.Handler {
 	})
 }
 
+//go:embed static
+var static embed.FS
+
+func withCSP(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src https://cdn.jsdelivr.net; frame-ancestors 'none'")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func newHandler(s *server, adminToken string) http.Handler {
 	api := http.NewServeMux()
 	api.HandleFunc("POST /teams", s.createTeam)
@@ -39,7 +51,6 @@ func newHandler(s *server, adminToken string) http.Handler {
 	api.HandleFunc("GET /teams/{id}", s.getTeam)
 	api.HandleFunc("DELETE /teams/{id}", s.deleteTeam)
 	api.HandleFunc("POST /teams/{id}/keys", s.issueKey)
-	api.HandleFunc("POST /teams/{id}/code", s.reissueCode)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +58,13 @@ func newHandler(s *server, adminToken string) http.Handler {
 	})
 	mux.Handle("/teams", requireToken(adminToken, api))
 	mux.Handle("/teams/", requireToken(adminToken, api))
-	mux.Handle("GET /me", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.getMe)))
-	mux.Handle("PATCH /me", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.updateMe)))
-	mux.Handle("POST /me/keys", requireTeamCode(s.teamIDByCode, http.HandlerFunc(s.issueMyKey)))
+	mux.Handle("GET /me", s.requireTeam(s.getMe))
+	mux.Handle("PATCH /me", s.requireTeam(s.updateMe))
+	mux.Handle("POST /me/keys", s.requireTeam(s.issueMyKey))
+	mux.Handle("GET /{$}", withCSP(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, static, "static/index.html")
+	})))
+	mux.Handle("GET /static/", withCSP(http.FileServerFS(static)))
 	return instrument(mux)
 }
 

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hackathon AI Gateway</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+  <script src="static/app.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <hgroup>
+      <h1>Hackathon AI Gateway</h1>
+      <p>Get your team's API key!</p>
+    </hgroup>
+  </header>
+
+  <main>
+    <form id="login">
+      <label for="team-input">Team ID (the 6 characters after <code>team-</code>)</label>
+      <fieldset role="group">
+        <input id="team-input" autocomplete="off" required>
+        <button>Enter</button>
+      </fieldset>
+      <small id="login-error"></small>
+    </form>
+
+    <div id="team" hidden>
+      <hr>
+      <h2>1. Team name</h2>
+      <form id="rename">
+        <label for="new-name">Current: <strong id="team-name"></strong></label>
+        <fieldset role="group">
+          <input id="new-name" maxlength="30" required>
+          <button>Rename</button>
+        </fieldset>
+        <small id="rename-error"></small>
+      </form>
+
+      <hr>
+      <h2>2. API key</h2>
+      <p>Issuing a new key revokes the old one immediately.</p>
+      <button id="issue" type="button">Issue key</button>
+      <small id="issue-error"></small>
+      <div id="new-key" hidden>
+        <p>This key is shown only once. Copy it now.</p>
+        <input id="key" readonly>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

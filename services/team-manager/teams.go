@@ -67,11 +67,10 @@ func (s *server) createTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var t team
-	code := newTeamCode()
 	for range 3 {
 		err = s.db.QueryRowContext(r.Context(),
-			"INSERT INTO teams (id, display_name, code_hash) VALUES ($1, $2, $3) RETURNING id, display_name, created_at",
-			newTeamID(), name, hashCode(code)).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
+			"INSERT INTO teams (id, display_name) VALUES ($1, $2) RETURNING id, display_name, created_at",
+			newTeamID(), name).Scan(&t.ID, &t.DisplayName, &t.CreatedAt)
 		if !isUniqueViolation(err) {
 			break
 		}
@@ -90,10 +89,7 @@ func (s *server) createTeam(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadGateway, "could not create team in litellm")
 		return
 	}
-	writeJSON(w, http.StatusCreated, struct {
-		team
-		Code string `json:"code"`
-	}{t, code})
+	writeJSON(w, http.StatusCreated, t)
 }
 
 func (s *server) listTeams(w http.ResponseWriter, r *http.Request) {
