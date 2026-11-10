@@ -39,10 +39,11 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      instance_types = ["t3.large"]
-      min_size       = 3
-      max_size       = 3
-      desired_size   = 3
+      instance_types                 = ["t3.large"]
+      use_latest_ami_release_version = false
+      min_size                       = 3
+      max_size                       = 3
+      desired_size                   = 3
     }
   }
 }

@@ -59,6 +59,45 @@ resource "aws_vpc_security_group_egress_rule" "alb" {
   ip_protocol       = "-1"
 }
 
+variable "venue_cidrs" {
+  type = list(string)
+}
+
+resource "aws_security_group" "alb_public" {
+  name   = "hackathon-alb-public"
+  vpc_id = module.vpc.vpc_id
+
+  tags = {
+    Name = "hackathon-alb-public"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "alb_public_http" {
+  for_each = toset(concat(var.admin_cidrs, var.venue_cidrs))
+
+  security_group_id = aws_security_group.alb_public.id
+  cidr_ipv4         = each.value
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "alb_public_https" {
+  for_each = toset(concat(var.admin_cidrs, var.venue_cidrs))
+
+  security_group_id = aws_security_group.alb_public.id
+  cidr_ipv4         = each.value
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_public" {
+  security_group_id = aws_security_group.alb_public.id
+  cidr_ipv4         = module.vpc.vpc_cidr_block
+  ip_protocol       = "-1"
+}
+
 module "lb_controller_pod_identity" {
   source  = "terraform-aws-modules/eks-pod-identity/aws"
   version = "2.10.0"

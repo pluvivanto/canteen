@@ -46,6 +46,47 @@ spec:
         namespaces:
           from: All
 ---
+apiVersion: gateway.k8s.aws/v1
+kind: LoadBalancerConfiguration
+metadata:
+  name: alb-public
+  namespace: gateway
+spec:
+  scheme: internet-facing
+  securityGroups:
+    - hackathon-alb-public
+  manageBackendSecurityGroupRules: true
+  listenerConfigurations:
+    - protocolPort: HTTPS:443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: alb-public
+  namespace: gateway
+spec:
+  gatewayClassName: alb
+  infrastructure:
+    parametersRef:
+      group: gateway.k8s.aws
+      kind: LoadBalancerConfiguration
+      name: alb-public
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.hackathon.pluvivanto.win"
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.hackathon.pluvivanto.win"
+      allowedRoutes:
+        namespaces:
+          from: All
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -56,6 +97,10 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: alb
+      sectionName: http
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: alb-public
       sectionName: http
   rules:
     - filters:

@@ -3,7 +3,7 @@ import { check } from "k6";
 import exec from "k6/execution";
 
 const DOMAIN = "hackathon.pluvivanto.win";
-const TEAM_API = `https://team.${DOMAIN}`;
+const TEAM_ADMIN_API = `https://team-admin.${DOMAIN}`;
 const LLM_API = `https://llm.${DOMAIN}`;
 const TOKEN = __ENV.TOKEN;
 const MODEL = __ENV.MODEL || "mock-slow";
@@ -31,8 +31,8 @@ const admin = { headers: { Authorization: `Bearer ${TOKEN}` } };
 export function setup() {
   const teams = [];
   for (let i = 1; i <= TEAMS; i++) {
-    const id = http.post(`${TEAM_API}/teams`, JSON.stringify({ display_name: `Load Test ${i}` }), admin).json("id");
-    const key = http.post(`${TEAM_API}/teams/${id}/keys`, null, admin).json("key");
+    const id = http.post(`${TEAM_ADMIN_API}/teams`, JSON.stringify({ display_name: `Load Test ${i}` }), admin).json("id");
+    const key = http.post(`${TEAM_ADMIN_API}/teams/${id}/keys`, null, admin).json("key");
     teams.push({ id, key });
   }
   return teams;
@@ -50,6 +50,6 @@ export default function (teams) {
 
 export function teardown(teams) {
   for (const team of teams) {
-    http.del(`${TEAM_API}/teams/${team.id}`, null, admin);
+    http.del(`${TEAM_ADMIN_API}/teams/${team.id}`, null, admin);
   }
 }
