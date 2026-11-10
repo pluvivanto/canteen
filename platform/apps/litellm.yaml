@@ -74,6 +74,14 @@ spec:
                   mock_response: "mock response"
                   input_cost_per_token: 0.000001
                   output_cost_per_token: 0.000002
+              - model_name: mock-slow
+                litellm_params:
+                  model: openai/mock-slow
+                  api_key: unused
+                  mock_response: "mock response"
+                  mock_delay: 3
+                  input_cost_per_token: 0.000001
+                  output_cost_per_token: 0.000002
               - model_name: claude-haiku-5-5
                 litellm_params:
                   model: bedrock/jp.anthropic.claude-haiku-5-5
