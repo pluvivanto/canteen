@@ -19,7 +19,7 @@ func (s *server) requireTeam(next http.HandlerFunc) http.Handler {
 		}
 		var exists bool
 		if err := s.db.QueryRowContext(r.Context(), "SELECT EXISTS (SELECT 1 FROM teams WHERE id = $1)", id).Scan(&exists); err != nil {
-			log.Printf("check team %s: %v", id, err)
+			log.Printf("check team: %v", err)
 			writeError(w, http.StatusInternalServerError, "could not check team")
 			return
 		}
