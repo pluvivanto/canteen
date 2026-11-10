@@ -1,6 +1,6 @@
-domain            = "<domain>"
-admin_cidrs       = ["<operator IP>/32"]
-venue_cidrs       = []
-alert_email       = "<email for alarms>"
-# sub_claim_prefix from: gh api repos/<owner>/<repo>/actions/oidc/customization/sub
+domain            = "example.com"
+admin_cidrs       = ["<operator CIDR>"]
+venue_cidrs       = ["<venue CIDR>"]
+alert_email       = "<email>"
+# sub_claim_prefix of the repo's OIDC subject claim
 github_sub_prefix = "<sub_claim_prefix>"

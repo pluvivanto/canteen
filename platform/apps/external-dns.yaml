@@ -21,7 +21,7 @@ spec:
         sources:
           - gateway-httproute
         domainFilters:
-          - hackathon.pluvivanto.win
+          - example.com
         policy: sync
         txtOwnerId: hackathon
   destination:

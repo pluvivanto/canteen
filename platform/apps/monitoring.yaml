@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/pluvivanto/canteen.git
+    - repoURL: https://github.com/<owner>/canteen.git
       targetRevision: main
       path: platform/monitoring
     - repoURL: https://prometheus-community.github.io/helm-charts
@@ -33,7 +33,7 @@ spec:
               main:
                 enabled: true
                 hostnames:
-                  - alertmanager.hackathon.pluvivanto.win
+                  - alertmanager.example.com
                 parentRefs:
                   - group: gateway.networking.k8s.io
                     kind: Gateway
@@ -47,7 +47,7 @@ spec:
               main:
                 enabled: true
                 hostnames:
-                  - grafana.hackathon.pluvivanto.win
+                  - grafana.example.com
                 parentRefs:
                   - group: gateway.networking.k8s.io
                     kind: Gateway

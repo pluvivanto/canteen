@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 env:
-  IMAGE: public.ecr.aws/t8f0j3e9/team-manager
+  IMAGE: public.ecr.aws/<alias>/team-manager
 
 jobs:
   build:

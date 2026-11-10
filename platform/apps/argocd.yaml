@@ -24,7 +24,7 @@ spec:
                 namespace: gateway
                 sectionName: https
             hostnames:
-              - argocd.hackathon.pluvivanto.win
+              - argocd.example.com
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

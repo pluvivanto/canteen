@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-DOMAIN=hackathon.pluvivanto.win
+DOMAIN=example.com
 TEAM_API=https://team.$DOMAIN
 TEAM_ADMIN_API=https://team-admin.$DOMAIN
 LLM_API=https://llm.$DOMAIN
 LLM_ADMIN_API=https://llm-admin.$DOMAIN
-TOKEN=$(kubectl --context eks-hackathon -n team-manager get secret team-manager-admin -o jsonpath='{.data.token}' | base64 -d)
-MASTER_KEY=$(kubectl --context eks-hackathon -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
+TOKEN=$(kubectl -n team-manager get secret team-manager-admin -o jsonpath='{.data.token}' | base64 -d)
+MASTER_KEY=$(kubectl -n litellm get secret litellm-masterkey -o jsonpath='{.data.masterkey}' | base64 -d)
 
 call() {
 	curl -s -o /dev/null -w '%{http_code}' $LLM_API/v1/chat/completions \

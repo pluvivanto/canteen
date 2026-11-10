@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/pluvivanto/canteen.git
+    - repoURL: https://github.com/<owner>/canteen.git
       targetRevision: main
       path: platform/litellm
     - repoURL: docker.litellm.ai/berriai

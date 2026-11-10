@@ -1,4 +1,4 @@
-module github.com/pluvivanto/canteen/services/team-manager
+module github.com/<owner>/canteen/services/team-manager
 
 go 1.26.0
 

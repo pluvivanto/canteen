@@ -11,7 +11,7 @@ spec:
       namespace: gateway
       sectionName: https
   hostnames:
-    - team.hackathon.pluvivanto.win
+    - team.example.com
   rules:
     - matches:
         - path:
@@ -43,7 +43,7 @@ spec:
       namespace: gateway
       sectionName: https
   hostnames:
-    - team-admin.hackathon.pluvivanto.win
+    - team-admin.example.com
   rules:
     - matches:
         - path:

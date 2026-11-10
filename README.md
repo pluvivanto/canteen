@@ -8,7 +8,7 @@ With canteen, you can:
 - Let teams get and replace their key on a self-service page
 - Use Claude on Amazon Bedrock without storing a provider API key
 - Keep admin tools off the venue network
-- Keep the API up when a node fails
+- Run three LiteLLM replicas across availability zones
 - Track requests, errors, latency, tokens, and spend for each team
 - Rebuild the whole platform from code for every event
 
@@ -58,23 +58,16 @@ flowchart LR
 
 Requirements: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), [Terraform](https://developer.hashicorp.com/terraform/install), [kubectl](https://kubernetes.io/docs/tasks/tools/), [Helm](https://helm.sh/docs/intro/install/), [GitHub CLI](https://cli.github.com/), [jq](https://jqlang.org/download/), and an AWS account with a GitHub OIDC provider.
 
-1. Fork the repository.
+1. Fork the repository. Replace `example.com` with your domain and `<owner>` with your GitHub user.
 
-2. Fill in the settings:
-
-   ```sh
-   cp infra/terraform.tfvars.example infra/terraform.tfvars
-   cp infra/dns/terraform.tfvars.example infra/dns/terraform.tfvars
-   ```
-
-3. Create the DNS zone:
+2. Create the DNS zone:
 
    ```sh
    terraform -chdir=infra/dns init
-   terraform -chdir=infra/dns apply   # set the printed name servers at your registrar
+   terraform -chdir=infra/dns apply
    ```
 
-4. Create the cluster and install Argo CD:
+3. Create the cluster and install Argo CD:
 
    ```sh
    terraform -chdir=infra init
@@ -85,7 +78,9 @@ Requirements: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting
    kubectl apply -f platform/root.yaml
    ```
 
-5. Point CI at your account and build the team-manager image:
+4. Replace `public.ecr.aws/<alias>/team-manager` with the output of `terraform -chdir=infra output -raw team_manager_image`.
+
+5. Point CI at your account and build the image:
 
    ```sh
    gh secret set AWS_ROLE_ARN --body "$(terraform -chdir=infra output -raw github_ci_role_arn)"
@@ -95,11 +90,10 @@ Requirements: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting
 6. Test:
 
    ```sh
-   # confirm the SNS email, wait until all apps are healthy
    ./scripts/test-teams.sh
    ```
 
-Rebuild: steps 4 and 5.
+Rebuild: steps 3 and 5.
 
 Tear down:
 
@@ -116,23 +110,23 @@ Load test with [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/): `TOK
 
 Participants, from `venue_cidrs`:
 
-- `https://team.<domain>`: team page
-- `https://llm.<domain>`: LLM API
+- `https://team.example.com`: team page
+- `https://llm.example.com`: LLM API
 
 Operators, from `admin_cidrs`:
 
-- `https://argocd.<domain>`
-- `https://grafana.<domain>`
-- `https://alertmanager.<domain>`
-- `https://llm-admin.<domain>`: LiteLLM admin
-- `https://team-admin.<domain>`: team admin API
+- `https://argocd.example.com`
+- `https://grafana.example.com`
+- `https://alertmanager.example.com`
+- `https://llm-admin.example.com`: LiteLLM admin
+- `https://team-admin.example.com`: team admin API
 
 ## Usage
 
 Create a team:
 
 ```console
-$ curl https://team-admin.<domain>/teams \
+$ curl https://team-admin.example.com/teams \
     -H "Authorization: Bearer <admin token>" \
     -d '{"display_name": "Team Foo"}'
 {"id":"team-abc234","display_name":"Team Foo",...}
@@ -141,7 +135,7 @@ $ curl https://team-admin.<domain>/teams \
 Delete a team:
 
 ```console
-$ curl -X DELETE https://team-admin.<domain>/teams/team-abc234 \
+$ curl -X DELETE https://team-admin.example.com/teams/team-abc234 \
     -H "Authorization: Bearer <admin token>"
 ```
 

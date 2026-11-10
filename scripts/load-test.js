@@ -2,7 +2,7 @@ import http from "k6/http";
 import { check } from "k6";
 import exec from "k6/execution";
 
-const DOMAIN = "hackathon.pluvivanto.win";
+const DOMAIN = "example.com";
 const TEAM_ADMIN_API = `https://team-admin.${DOMAIN}`;
 const LLM_API = `https://llm.${DOMAIN}`;
 const TOKEN = __ENV.TOKEN;
