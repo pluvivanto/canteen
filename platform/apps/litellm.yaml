@@ -41,10 +41,12 @@ spec:
                 enabled: false
               helm:
                 enabled: true
+          envVars:
+            KEEPALIVE_TIMEOUT: "65"
           resources:
             requests:
-              cpu: 200m
-              memory: 512Mi
+              cpu: 500m
+              memory: 1Gi
             limits:
               memory: 2Gi
           masterkeySecretName: litellm-masterkey
